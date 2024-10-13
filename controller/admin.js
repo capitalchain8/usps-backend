@@ -1,8 +1,8 @@
 const express = require("express")
 const mongoose = require("mongoose");
 const jwt = require("jsonwebtoken")
-const { generateAcessToken, shipmentArrival, shipmentMessage } = require('../utils/utils')
-const { Admin, Cossignment, History, } = require("../database/databaseConfig");
+const { generateAcessToken, shipmentMessage } = require('../utils/utils')
+const { Admin, Cossignment } = require("../database/databaseConfig");
 const { validationResult } = require("express-validator");
 const random_number = require('random-number')
 
@@ -12,11 +12,6 @@ let request = require('request');
 const { shipmentNotification } = require('../utils/utils')
 
 
-
-
-Admin.find().then(data=>{
-   console.log(data)
-})
 
 
 module.exports.getAdminFromJwt = async (req, res, next) => {
@@ -285,12 +280,16 @@ module.exports.getCosignment = async (req, res, next) => {
 
    }
 }
+
+
+
+
+
 module.exports.updateCosignment = async (req, res, next) => {
    try {
       let cossignmentId = req.params.id
       //fetching details from the request object
       let {
-         _id,
          payment_mode,
          carrier,
          destination,
@@ -320,9 +319,38 @@ module.exports.updateCosignment = async (req, res, next) => {
          length,
          width,
          height,
-         status
+         status,
+
+         inTransit_status,
+         inTransit_location,
+         inTransit_timestamp,
+         inTransit_active,
+
+         pickedUp_status,
+         pickedUp_location,
+         pickedUp_timestamp,
+         pickedUp_active,
+
+         preparingForDelivery_status,
+         preparingForDelivery_location,
+         preparingForDelivery_timestamp,
+         preparingForDelivery_active,
+
+         outForDelivery_status,
+         outForDelivery_location,
+         outForDelivery_timestamp,
+         outForDelivery_active,
+
+         delivered_status,
+         delivered_location,
+         delivered_timestamp,
+         delivered_active,
+
+         lattitude,
+         longitude
       } = req.body
 
+      
 
 
       let cossignment_ = await Cossignment.findOne({ _id: cossignmentId })
@@ -364,6 +392,36 @@ module.exports.updateCosignment = async (req, res, next) => {
       cossignment_.width = width || ''
       cossignment_.height = height || ''
       cossignment_.status = status || ''
+
+
+      cossignment_.inTransit_status = inTransit_status || ''
+      cossignment_.inTransit_location = inTransit_location || ''
+      cossignment_.inTransit_timestamp = inTransit_timestamp || ''
+      cossignment_.inTransit_active = inTransit_active
+
+      cossignment_.pickedUp_status = pickedUp_status || ''
+      cossignment_.pickedUp_location = pickedUp_location || ''
+      cossignment_.pickedUp_timestamp = pickedUp_timestamp || ''
+      cossignment_.pickedUp_active = pickedUp_active
+
+      cossignment_.preparingForDelivery_status = preparingForDelivery_status || ''
+      cossignment_.preparingForDelivery_location = preparingForDelivery_location || ''
+      cossignment_.preparingForDelivery_timestamp = preparingForDelivery_timestamp || ''
+      cossignment_.preparingForDelivery_active = preparingForDelivery_active
+
+      cossignment_.outForDelivery_status = outForDelivery_status || ''
+      cossignment_.outForDelivery_location = outForDelivery_location || ''
+      cossignment_.outForDelivery_timestamp = outForDelivery_timestamp || ''
+      cossignment_.outForDelivery_active = outForDelivery_active
+
+      cossignment_.delivered_status = delivered_status || ''
+      cossignment_.delivered_location = delivered_location || ''
+      cossignment_.delivered_timestamp = delivered_timestamp || ''
+      cossignment_.delivered_active = delivered_active
+
+      cossignment_.lattitude = Number(lattitude)
+      cossignment_.longitude = Number(longitude)
+
 
       let savedCossignment_ = await cossignment_.save()
 
@@ -414,7 +472,7 @@ module.exports.newCosignment = async (req, res, next) => {
          mode,
          origin,
          piece_type,
-         Status,
+         status,
          shipper_name,
          shipper_phoneNumber,
          shipper_address,
@@ -438,14 +496,15 @@ module.exports.newCosignment = async (req, res, next) => {
          length,
          width,
          height,
-         
-
+         latestUpdate,
+         longitude,
+         lattitude
       } = req.body
 
       //generate a reference number
       let reference_number = random_number({
-         min: 3000000,
-         max: 6000000,
+         min: 3000000000,
+         max: 6000000000,
          integer: true
       })
 
@@ -457,7 +516,7 @@ module.exports.newCosignment = async (req, res, next) => {
          mode,
          origin,
          piece_type,
-         Status,
+         status,
          shipper_name,
          shipper_phoneNumber,
          shipper_address,
@@ -474,7 +533,7 @@ module.exports.newCosignment = async (req, res, next) => {
          courier,
          quantity,
          total_freight,
-         courier_Reference_No: `SKYL-${reference_number}`,
+         courier_Reference_No: reference_number,
          pickup_date,
          expected_delivery_date,
          Qty,
@@ -482,58 +541,46 @@ module.exports.newCosignment = async (req, res, next) => {
          length,
          width,
          height,
-         status:'Pending'
+         latestUpdate,
+
+
+         inTransit_status: 'in Transit',
+         inTransit_location: origin,
+         inTransit_timestamp: depature_time,
+         inTransit_active: true,
+
+         pickedUp_status: 'picked Up',
+         pickedUp_location: '',
+         pickedUp_timestamp: '',
+         pickedUp_active: false,
+
+         preparingForDelivery_status: 'preparing For Delivery',
+         preparingForDelivery_location: '',
+         preparingForDelivery_timestamp: ' ',
+         preparingForDelivery_active: false,
+
+         outForDelivery_status: 'out For Delivery',
+         outForDelivery_location: '',
+         outForDelivery_timestamp: '',
+         outForDelivery_active: false,
+
+         delivered_status: 'delivered',
+         delivered_location: '',
+         delivered_timestamp: '',
+         delivered_active: false,
+
+         longitude:Number(longitude),
+         lattitude:Number(lattitude)
+
       })
 
-
       let savedCossignment = await newCossignment.save()
+
 
       if (!savedCossignment) {
          let error = new Error("an error occured")
          return next(error)
       }
-      // Create mailjet send email
-      const mailjet = Mailjet.apiConnect(process.env.MAILJET_APIKEY, process.env.MAILJET_SECRETKEY
-      )
-
-      const request = await mailjet.post("send", { 'version': 'v3.1' })
-         .request({
-            "Messages": [
-               {
-                  "From": {
-                     "Email": "skylane@secsonlines.com",
-                     "Name": "secsonlines"
-                  },
-                  "To": [
-                     {
-                        "Email": `${reciever_email}`,
-                        "Name": `${reciever_email}`
-                     }
-                  ],
-                  "Subject": "ORDER SHIPPMENT",
-                  "TextPart": ``,
-                  "HTMLPart": shipmentNotification(
-                     shipper_name,
-                     shipper_phoneNumber,
-                     shipper_address,
-                     shipper_email,
-                     reciever_name,
-                     reciever_email,
-                     reciever_phoneNumber,
-                     reciever_address,
-                     `SKYL-${reference_number}`
-                  )
-               }
-            ]
-         })
-
-
-      if (!request) {
-         let error = new Error("could not verify.Try later")
-         return next(error)
-      }
-
-
 
       //modify client of shipment history
       return res.status(200).json({
@@ -545,225 +592,14 @@ module.exports.newCosignment = async (req, res, next) => {
    }
 }
 
-// history route
-module.exports.getHistories = async (req, res, next) => {
-   try {
-      let id = req.params.id
-
-      let history = await History.find({ cossignment: id })
-
-      if (!history) {
-         let error = new Error("An error occured")
-         return next(error)
-      }
-      return res.status(200).json({
-         response: history
-      })
-
-   } catch (error) {
-      error.message = error.message || "an error occured try later"
-      return next(error)
-   }
-}
-module.exports.getHistory = async (req, res, next) => {
-   try {
-      let historyId = req.params.id
-      let history_ = await History.findOne({ _id: historyId })
-
-      if (!history_) {
-         let error = new Error('an error occured')
-         return next(error)
-      }
-
-      return res.status(200).json({
-         response: {
-            history_
-         }
-      })
-   } catch (error) {
-      error.message = error.message || "an error occured try later"
-      return next(error)
-
-   }
-}
-module.exports.updateHistory = async (req, res, next) => {
-   try {
-      let historyId = req.params.id
-      //fetching details from the request object
-      let {
-         date,
-         time,
-         location,
-         status,
-         UploadedBy,
-         Remarks,
-         cossignment,
-         lattitude,
-         longitude
-      } = req.body
-
-      let history_ = await History.findOne({ _id: historyId })
-
-      if (!history_) {
-         let error = new Error("user not found")
-         return next(error)
-      }
-
-      //update history
-      history_.date = date || ''
-      history_.longitude = longitude || ''
-      history_.lattitude = lattitude || ''
-      history_.cossignment = cossignment || ''
-      history_.Remarks = Remarks || ''
-      history_.UploadedBy = UploadedBy || ''
-      history_.status = status || ''
-      history_.location = location || ''
-      history_.time = time || ''
-
-      let savedHistory_ = await history_.save()
-
-      if (!savedHistory_) {
-         let error = new Error("an error occured on the server")
-         return next(error)
-      }
-
-      //email to notify client of shipment location
-      return res.status(200).json({
-         response: savedHistory_
-      })
-
-   } catch (error) {
-      error.message = error.message || "an error occured try later"
-      return next(error)
-   }
-}
-module.exports.deleteHistory = async (req, res, next) => {
-   try {
-
-      let historyId = req.params.id
-
-      let history_ = await History.deleteOne({ _id: historyId })
-
-      if (!history_) {
-         let error = new Error("an error occured")
-
-         return next(error)
-      }
-      return res.status(200).json({
-         response: {
-            message: 'deleted successfully'
-         }
-      })
-
-   } catch (error) {
-      error.message = error.message || "an error occured try later"
-      return next(error)
-
-   }
-}
-module.exports.newHistory = async (req, res, next) => {
-   try {
-      let {
-         date,
-         time,
-         location,
-         status,
-         UploadedBy,
-         Remarks,
-         cossignment,
-         lattitude,
-         longitude
-
-      } = req.body
-
-      console.log(location)
-
-      //find the cossignment
-
-      let foundCossignment = await Cossignment.findOne({ _id: cossignment })
-
-      if (!foundCossignment) {
-         let error = new Error("an error occured")
-         return next(error)
-      }
-
-
-      let newHistory = new History({
-         _id: new mongoose.Types.ObjectId(),
-         date,
-         time,
-         location,
-         status,
-         UploadedBy,
-         Remarks,
-         lattitude,
-         longitude,
-         cossignment: foundCossignment,
-      })
-
-
-      let savedHistory = await newHistory.save()
-
-      if (!savedHistory) {
-         let error = new Error("an error occured")
-         return next(error)
-      }
-
-      //modify client of shipment history
-      // Create mailjet send email
-      const mailjet = Mailjet.apiConnect(process.env.MAILJET_APIKEY, process.env.MAILJET_SECRETKEY
-      )
-      
-      //skylane@secsonlines.com
-
-      const request = await mailjet.post("send", { 'version': 'v3.1' })
-         .request({
-            "Messages": [
-               {
-                  "From": {
-                     "Email": "skylane@secsonlines.com",
-                     "Name": "secsonlines"
-                  },
-                  "To": [
-                     {
-                        "Email": `${foundCossignment.reciever_email}`,
-                        "Name": `${foundCossignment.reciever_email}`
-                     }
-                  ],
-                  "Subject": "SHIPPMENT ARRIVAL",
-                  "TextPart": ``,
-                  "HTMLPart": shipmentArrival(location,foundCossignment.courier_Reference_No)
-               }
-            ]
-         })
-
-
-      if (!request) {
-         let error = new Error("could not verify.Try later")
-         return next(error)
-      }
-
-
-      return res.status(200).json({
-         response: savedHistory
-      })
-
-   } catch (error) {
-      error.message = error.message || "an error occured try later"
-      return next(error)
-   }
-}
-
-
-
 module.exports.sendEmail = async (req, res, next) => {
    try {
 
-      let {email,message} = req.body
+      let { email, message } = req.body
       // Create mailjet send email
       const mailjet = Mailjet.apiConnect(process.env.MAILJET_APIKEY, process.env.MAILJET_SECRETKEY
       )
-      
+
       //skylane@secsonlines.com
 
       const request = await mailjet.post("send", { 'version': 'v3.1' })

@@ -4,8 +4,40 @@ mongoose.connect(process.env.DB_STRING).then(() => {
     //console.log("connected to database")
 })
 
+
+
 const CosignmentSchema = new mongoose.Schema({
     _id: mongoose.Schema.Types.ObjectId,
+    consignmentId:String,
+    //history
+    inTransit_status: String,
+    inTransit_location: String,
+    inTransit_timestamp: String,
+    inTransit_active: Boolean,
+
+    pickedUp_status: String,
+    pickedUp_location: String,
+    pickedUp_timestamp: String,
+    pickedUp_active: Boolean,
+
+    preparingForDelivery_status: String,
+    preparingForDelivery_location: String,
+    preparingForDelivery_timestamp: String,
+    preparingForDelivery_active: Boolean,
+
+    outForDelivery_status: String,
+    outForDelivery_location: String,
+    outForDelivery_timestamp: String,
+    outForDelivery_active: Boolean,
+
+    delivered_status: String,
+    delivered_location: String,
+    delivered_timestamp: String,
+    delivered_active: Boolean,
+
+    remark: {
+        type: String
+    },
     //SHIPPER DETAILS
     shipper_name: {
         type: String
@@ -78,7 +110,6 @@ const CosignmentSchema = new mongoose.Schema({
     },
     origin: {
         type: String
-
     },
     pickup_date: {
         type: String
@@ -113,40 +144,17 @@ const CosignmentSchema = new mongoose.Schema({
         type: String
     },
 
-})
-
-const HistorySchema = new mongoose.Schema({
-    _id: mongoose.Schema.Types.ObjectId,
-    date: {
-        type: String
-    },
-    time: {
-        type: String
-    },
-    location: {
-        type: String
-    },
-    status: {
-        type: String
-    },
-    UploadedBy: {
-        type: String
-    },
-    Remarks: {
+    latestUpdate: {
         type: String
     },
     lattitude: {
-        type: String
+        type: Number
     },
     longitude: {
-        type: String
+        type:Number
     },
-    cossignment: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: "Cossignment"
-    },
+});
 
-})
 
 const AdminSchema = new mongoose.Schema({
     _id: mongoose.Schema.Types.ObjectId,
@@ -156,24 +164,22 @@ const AdminSchema = new mongoose.Schema({
     password: {
         type: String
     },
-    phoneNumber:{
-        type:String
+    phoneNumber: {
+        type: String
     },
-    registerationNumber:{
-        type:String
+    registerationNumber: {
+        type: String
     },
-    address:{
-        type:String
+    address: {
+        type: String
     }
 })
 
 let Cosignment = new mongoose.model("Cosignment", CosignmentSchema)
-let History = new mongoose.model("History", HistorySchema)
 let Admin = new mongoose.model("Admin", AdminSchema)
 
 
 module.exports.Cossignment = Cosignment
-module.exports.History = History
 module.exports.Admin = Admin
 
 

@@ -1,7 +1,7 @@
 const express = require("express")
 const router = express.Router()
 const { verifyAdmin} = require("../utils/utils")
-const { deleteCosignment, newCosignment, updateCosignment, getHistories, getHistory, updateHistory, deleteHistory, newHistory,sendEmail } = require("../controller/admin")
+const { deleteCosignment, newCosignment, updateCosignment,sendEmail } = require("../controller/admin")
 
 
 let login = require("../controller/admin").login
@@ -30,14 +30,7 @@ router.delete('/cosignments/:id',verifyAdmin,deleteCosignment)
 router.post('/cosignment',verifyAdmin,newCosignment)
 
 // history route
-router.get('/histories/:id',verifyAdmin,getHistories)
-router.get('/history/:id',verifyAdmin,getHistory)
-router.patch('/histories/:id',verifyAdmin,updateHistory)
-router.delete('/history/:id',verifyAdmin,deleteHistory)
-router.post('/history',verifyAdmin,newHistory)
 router.post('/sendemail',sendEmail)
-
-
 
 
 exports.router = router
