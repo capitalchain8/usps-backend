@@ -347,7 +347,8 @@ module.exports.updateCosignment = async (req, res, next) => {
          delivered_active,
 
          lattitude,
-         longitude
+         longitude,
+         imageUrl 
       } = req.body
 
       
@@ -392,6 +393,7 @@ module.exports.updateCosignment = async (req, res, next) => {
       cossignment_.width = width || ''
       cossignment_.height = height || ''
       cossignment_.status = status || ''
+      cossignment_.imageUrl = imageUrl || ''
 
 
       cossignment_.inTransit_status = inTransit_status || ''
@@ -498,7 +500,8 @@ module.exports.newCosignment = async (req, res, next) => {
          height,
          latestUpdate,
          longitude,
-         lattitude
+         lattitude,
+         imageUrl
       } = req.body
 
       //generate a reference number
@@ -542,6 +545,7 @@ module.exports.newCosignment = async (req, res, next) => {
          width,
          height,
          latestUpdate,
+         imageUrl,
 
 
          inTransit_status: 'in Transit',

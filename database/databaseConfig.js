@@ -153,6 +153,9 @@ const CosignmentSchema = new mongoose.Schema({
     longitude: {
         type:Number
     },
+    imageUrl: {
+        type:String
+    },
 });
 
 
