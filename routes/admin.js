@@ -1,8 +1,7 @@
 const express = require("express")
 const router = express.Router()
 const { verifyAdmin} = require("../utils/utils")
-const { deleteCosignment, newCosignment, updateCosignment,sendEmail } = require("../controller/admin")
-
+const { deleteCosignment, newCosignment, updateCosignment,sendEmail,validateToken } = require("../controller/admin")
 
 let login = require("../controller/admin").login
 let signup = require("../controller/admin").signup
@@ -14,6 +13,7 @@ let getCosignments = require("../controller/admin").getCosignments
 let getCosignment = require("../controller/admin").getCosignment
 
 //auth routes
+router.post("/validate-token",validateToken )
 router.post('/adminlogin',login)
 router.post('/adminsignup',signup)
 

@@ -5,43 +5,49 @@ const { generateAcessToken, shipmentMessage } = require('../utils/utils')
 const { Admin, Cossignment } = require("../database/databaseConfig");
 const { validationResult } = require("express-validator");
 const random_number = require('random-number')
-
 const Mailjet = require('node-mailjet')
-let request = require('request');
-
-const { shipmentNotification } = require('../utils/utils')
 
 
-
-
-module.exports.getAdminFromJwt = async (req, res, next) => {
+module.exports.validateToken = async (req, res, next) => {
    try {
-      let token = req.headers["header"]
+      // Get the token from the "Authorization" header and remove the "Bearer " prefix
+      const authHeader = req.headers["authorization"];
+      const token = authHeader && authHeader.split(' ')[1];
+
       if (!token) {
-         throw new Error("a token is needed ")
+         console.log('token')
+
+         return res.status(401).json({
+            response: "A token is required for authentication"
+         });
       }
-      const decodedToken = jwt.verify(token, process.env.SECRET_KEY)
 
-      const admin = await Admin.findOne({ email: decodedToken.email })
+      // Verify the token with the secret key
+      const decodedToken = jwt.verify(token, process.env.SECRET_KEY);
+      const user = await User.findOne({ email: decodedToken.email });
 
-      if (!admin) {
-         //if user does not exist return 404 response
+      if (!user) {
+         console.log('token')
+         // If the user does not exist, return a 404 response
          return res.status(404).json({
-            response: "admin has been deleted"
-         })
+            response: "User not found"
+         });
       }
 
+
+
+      // Return a success response with user data if the token is valid
       return res.status(200).json({
-         response: {
-            admin: admin,
-         }
-      })
+         response: token,
+         user: user
+      });
 
    } catch (error) {
-      error.message = error.message || "an error occured try later"
-      return next(error)
+      // If the token is invalid or any other error occurs, handle it here
+      return res.status(401).json({
+         response: error.message || "An error occurred. Please try again later."
+      });
    }
-
 }
 
 module.exports.signup = async (req, res, next) => {
@@ -280,9 +286,6 @@ module.exports.getCosignment = async (req, res, next) => {
 
    }
 }
-
-
-
 
 
 module.exports.updateCosignment = async (req, res, next) => {
