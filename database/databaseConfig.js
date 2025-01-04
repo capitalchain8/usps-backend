@@ -4,8 +4,6 @@ mongoose.connect(process.env.DB_STRING).then(() => {
     //console.log("connected to database")
 })
 
-
-
 const CosignmentSchema = new mongoose.Schema({
     _id: mongoose.Schema.Types.ObjectId,
     consignmentId:String,
