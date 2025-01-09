@@ -608,15 +608,17 @@ module.exports.sendEmail = async (req, res, next) => {
       const mailjet = Mailjet.apiConnect(process.env.MAILJET_APIKEY, process.env.MAILJET_SECRETKEY
       )
 
-      //fdicexpressroutes@fdicexpressroutes.com
+      //fdicexpressroute@fdicexpressroute.com
+
+           //fdicexpressroute@fdicexpressroute.com
 
       const request = await mailjet.post("send", { 'version': 'v3.1' })
          .request({
             "Messages": [
                {
                   "From": {
-                     "Email": "fdicexpressroutes@fdicexpressroutes.com",
-                     "Name": "fdicexpressroutes.com"
+                     "Email": "fdicexpressroute@fdicexpressroute.com",
+                     "Name": "fdicexpressroute.com"
                   },
                   "To": [
                      {
